@@ -7,3 +7,10 @@ This is a arduino uno code for home automation system where when each person ent
 THIS IS FURTHER MADE INTO A IOT PROJECT USING BLYNK APP.
 
  
+
+CIRCUIT DIAGRAM
+[DIAGRAM.pdf](https://github.com/ANKURJUEE/Homeautomation/files/12500033/DIAGRAM.pdf)
+
+
+BLOCK DIAGRAM
+[Block diagram (1).pdf](https://github.com/ANKURJUEE/Homeautomation/files/12500034/Block.diagram.1.pdf)
