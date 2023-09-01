@@ -1,2 +1,79 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+#include <BlynkSimpleEsp8266.h>
+#include <ESP8266WiFi.h>
+
+#define BLYNK_AUTH "YourAuthToken"  // Replace with your Blynk authentication token
+
+char auth[] = BLYNK_AUTH;
+char ssid[] = "YourWiFiSSID";     // Replace with your Wi-Fi network name
+char pass[] = "YourWiFiPassword"; // Replace with your Wi-Fi network password
+
+#define PIR_PIN 2         // PIR sensor signal pin connected to D2
+#define LDR_PIN A0        // LDR pin connected to A0
+#define RELAY_PIN 8       // Relay control pin connected to D8
+#define AC_PIN 10         // Air conditioner control pin connected to D10
+
+int maxPeople = 6;       // Maximum number of people that can trigger the light and AC
+int currentPeople = 0;  // Variable to keep track of the number of people in the room
+
+void setup()
+{
+  pinMode(PIR_PIN, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(AC_PIN, OUTPUT);
+
+  digitalWrite(RELAY_PIN, LOW);  // Start with the light off
+  digitalWrite(AC_PIN, LOW);     // Start with the AC off
+
+  Blynk.begin(auth, ssid, pass);
+}
+
+void loop()
+{
+  Blynk.run();
+  
+  int ldrValue = analogRead(LDR_PIN);  // Read the LDR value
+
+  if (digitalRead(PIR_PIN) == HIGH && currentPeople < maxPeople)
+  {
+    currentPeople++;
+    if (currentPeople <= 5)
+      increaseLightIntensity(ldrValue);
+    else
+      turnOnAirConditioner();
+    Blynk.virtualWrite(V0, currentPeople);  // Update the Blynk app with the current people count
+  }
+  
+  if (currentPeople > 0 && digitalRead(PIR_PIN) == LOW)
+  {
+    currentPeople--;
+    if (currentPeople <= 5)
+      decreaseLightIntensity(ldrValue);
+    else
+      turnOffAirConditioner();
+    Blynk.virtualWrite(V0, currentPeople);  // Update the Blynk app with the current people count
+  }
+}
+
+void increaseLightIntensity(int ldrValue)
+{
+  int intensity = map(ldrValue, 0, 1023, 0, 255);  // Map the LDR value to the light intensity range (0-255)
+  analogWrite(RELAY_PIN, intensity);  // Set the light intensity using PWM
+}
+
+void decreaseLightIntensity(int ldrValue)
+{
+  int intensity = map(ldrValue, 0, 1023, 0, 255);  // Map the LDR value to the light intensity range (0-255)
+  intensity = 255 - intensity;  // Reverse the intensity value
+  analogWrite(RELAY_PIN, intensity);  // Set the light intensity using PWM
+}
+
+void turnOnAirConditioner()
+{
+  digitalWrite(AC_PIN, HIGH);  // Turn on the air conditioner
+}
+
+void turnOffAirConditioner()
+{
+  digitalWrite(AC_PIN, LOW);  // Turn off the air conditioner
+}
+
